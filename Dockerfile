@@ -14,13 +14,5 @@ RUN wget -q --header "Cookie: oraclelicense=accept-securebackup-cookie" \
   mv jdk1.8.0_45/ /usr/lib/java/ && \
   update-alternatives --install /usr/bin/java java /usr/lib/java/jdk1.8.0_45/bin/java 100 && \
   update-alternatives --install /usr/bin/javac javac /usr/lib/java/jdk1.8.0_45/bin/javac 100
-RUN mkdir -p minecraft && \
-  cd minecraft && \
-  wget -q https://s3.amazonaws.com/Minecraft.Download/versions/1.8.7/minecraft_server.1.8.7.jar
+RUN mkdir -p minecraft
 ADD ./eula.txt /minecraft/eula.txt
-ADD ./run.bash /minecraft/run.bash
-
-WORKDIR /minecraft
-ENTRYPOINT ["./run.bash"]
-CMD ["-Xms1G", "-Xmx2G"]
-EXPOSE 25565
