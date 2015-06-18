@@ -5,7 +5,7 @@ RUN cd /minecraft && \
   wget -q https://s3.amazonaws.com/Minecraft.Download/versions/1.8.7/minecraft_server.1.8.7.jar
 ADD ./run-vanilla.bash /minecraft/run-vanilla.bash
 
-WORKDIR /minecraft
+WORKDIR /minecraft/data
 EXPOSE 25565
-ENTRYPOINT ["./run-vanilla.bash"]
+ENTRYPOINT ["/minecraft/run-vanilla.bash"]
 CMD ["-Xms1G", "-Xmx2G"]

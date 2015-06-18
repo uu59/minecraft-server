@@ -5,7 +5,7 @@ RUN cd /minecraft && \
   java -jar ./forge-1.7.10-10.13.4.1448-1.7.10-installer.jar --installServer
 ADD ./run-forge.bash /minecraft/run-forge.bash
 
-WORKDIR /minecraft
+WORKDIR /minecraft/data
 EXPOSE 25565
-ENTRYPOINT ["./run-forge.bash"]
+ENTRYPOINT ["/minecraft/run-forge.bash"]
 CMD ["-Xms1G", "-Xmx2G"]

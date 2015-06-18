@@ -2,5 +2,5 @@
 
 set -ue
 
-cd /minecraft
-/usr/bin/java $@ -d64 -jar ./minecraft_server.1.8.7.jar nogui
+cd /minecraft/data
+/usr/bin/java $@ -d64 -jar /minecraft/minecraft_server.1.8.7.jar nogui
