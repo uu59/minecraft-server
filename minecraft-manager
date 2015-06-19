@@ -41,12 +41,12 @@ such as \`DATA_DIR=/var/minecraft $0 start\`
 EOF
 }
 
-send() {
+send-keys() {
   tmux send-keys -t "$SESS:0" "$(printf "$1\r")"
 }
 
-is_launched() {
-  grep -q -F "$SESS: " <<< "$(tmux ls)"
+is_running() {
+  grep -q -F "$SESS: " <<< "$(tmux ls)" && grep -q -F "minecraft-$SESS:latest" <<< "$(docker ps)"
   echo $?
 }
 
@@ -57,42 +57,43 @@ build() {
 
 status() {
   echo -n "$SESS server is "
-  if [ $(is_launched) -eq 0 ];then
+  if [ $(is_running) -eq 0 ];then
     echo launched
   else
     echo no launched
   fi
 }
 
-launch() {
-  if [ $(is_launched) -ne 0 ]; then
+start-tmux-session() {
+  if [ $(is_running) -ne 0 ]; then
     TMUX= tmux new -s "$SESS" -d
   fi
 }
 
 start() {
-  launch
+  start-tmux-session
   # logs are $DATA/logs/*.log
-  send "docker run -i -t -v $DATA:/minecraft/data minecraft-$SESS"
+  send-keys "docker run -i -t -v $DATA:/minecraft/data minecraft-$SESS"
+  echo Running in tmux session "$SESS", \`tmux a -s $SESS\` to attach.
 }
 
 stop() {
-  if [ $(is_launched) -ne 0 ];then
+  if [ $(is_running) -ne 0 ];then
     echo already stopped
     return 0
   fi
   echo Stopping..
-  send "stop"
+  send-keys "stop"
 }
 
 backup() {
   TAR="./$SESS-$(date +%Y%m%d-%H%M%S).tar" 
   time -p {
-    send "save-all"
-    send "save-off"
+    send-keys "save-all"
+    send-keys "save-off"
     sleep 1
     tar cf "$TAR" -C "$DATA/.." "./$(basename $DATA)"
-    send "save-on"
+    send-keys "save-on"
   }
   xz -1 "$TAR"
 }
