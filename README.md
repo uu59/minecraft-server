@@ -1,4 +1,4 @@
-Minecraft server manager with tmux and Docker.
+Minecraft server manager with tmux.
 
 # Usage
 
@@ -8,11 +8,10 @@ $ ./minecraft-manager
 Usage ./minecraft-manager <command>
 
 Commands:
-  status      Display forge server status
-  start       Start forge server
-  stop        Stop  forge server
-  backup      Start backup forge server data
-  build       Build Docker image for forge
+  status      Display server status
+  start       Start server
+  stop        Stop  server
+  backup      Start backup server data
 
 Minecraft server data under the /tmp by default,
 but you can specify it with `DATA_DIR` environment
@@ -23,18 +22,22 @@ such as `DATA_DIR=/var/minecraft ./minecraft-manager start`
 
 <http://www.minecraftforge.net/wiki/Installation/Universal>
 
-Management with `SESS=forge` (default)
+Save `forge-*.jar` and put jars as below.
 
 ```
-$ SESS=forge ./minecraft-manager build
-$ SESS=forge ./minecraft-manager start
+$ tree -F -L 1 ./jar
+./jar
+├── forge-1.8-11.14.3.1450-installer.jar
+├── forge-1.8-11.14.3.1450-installer.jar.log
+├── forge-1.8-11.14.3.1450-universal.jar
+├── libraries/
+└── minecraft_server.1.8.jar
+
+1 directory, 4 files
 ```
 
-## Vanilla
+Then start a server.
 
-Management with `SESS=vanilla`.
-
-```shell-session
-$ SESS=vanilla ./minecraft-manager build
-$ SESS=vanilla ./minecraft-manager start
+```
+$ JAR=forge-1.8-11.14.3.1450-universal.jar ./minecraft-manager start
 ```

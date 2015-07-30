@@ -2,12 +2,27 @@
 
 set -ue
 
-main() {
-  : ${SESS:=forge}
-  : ${DATA_DIR:=/tmp}
-  DATA="$DATA_DIR/minecraft-$SESS"
-  mkdir -p "$DATA"
+ROOT_DIR="$(cd $(dirname $0); pwd)"
+cd "$ROOT_DIR"
+: ${DATA_DIR:=/tmp}
+DATA="$DATA_DIR/minecraft-forge"
+mkdir -p "$DATA"
 
+WORK_DIR="$ROOT_DIR/work"
+BACKUP_DIR="$ROOT_DIR/backup"
+
+# JAR="forge-1.7.10-10.13.4.1448-1.7.10-universal.jar"
+: ${JAR:="forge-1.8-11.14.3.1450-universal.jar"}
+JAR_PATH="$ROOT_DIR/jar/$JAR"
+: ${JVM_OPTIONS:="-server -d64 -XX:-UseConcMarkSweepGC \
+  -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 \
+  -Xloggc:logs/gc.log -XX:-UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=10m \
+  -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps \
+  -XX:MaxMetaspaceSize=384M -Xss4M -Xms2G -Xmx2G \
+  "}
+
+main() {
+  init-directories
   if [ $# -eq 0 ];then
     usage
     exit 1
@@ -29,11 +44,10 @@ usage() {
 Usage $0 <command>
 
 Commands:
-  status      Display $SESS server status
-  start       Start $SESS server
-  stop        Stop  $SESS server
-  backup      Start backup $SESS server data
-  build       Build Docker image for $SESS
+  status      Display server status
+  start       Start server
+  stop        Stop server
+  backup      Start backup server data
 
 Minecraft server data under the $DATA_DIR by default,
 but you can specify it with \`DATA_DIR\` environment
@@ -41,40 +55,49 @@ such as \`DATA_DIR=/var/minecraft $0 start\`
 EOF
 }
 
+init-directories() {
+  mkdir -p "$ROOT_DIR"/{jar,backup,mods,work}
+}
+
 send-keys() {
-  tmux send-keys -t "$SESS:0" "$(printf "$1\r")"
+  tmux send-keys -t "forge:0" "$(printf "$1\r")"
 }
 
 is_running() {
-  grep -q -F "$SESS: " <<< "$(tmux ls)" && grep -q -F "minecraft-$SESS:latest" <<< "$(docker ps)"
+  grep -q -F "forge: " <<< "$(tmux ls)" && grep -q -F "$(basename $JAR)" <<< "$(ps aux)"
   echo $?
 }
 
-build() {
-  docker build -t minecraft-base -f ./Dockerfile .
-  docker build -t "minecraft-$SESS" -f "./Dockerfile-$SESS" .
-}
-
 status() {
-  echo -n "$SESS server is "
+  echo -n "server is "
   if [ $(is_running) -eq 0 ];then
-    echo launched
+    echo running
   else
-    echo no launched
+    echo stopped
   fi
 }
 
 start-tmux-session() {
-  if [ $(is_running) -ne 0 ]; then
-    TMUX= tmux new -s "$SESS" -d
+  if ! grep -F -q "forge" <<< "$(tmux ls)"; then
+    TMUX= tmux new -s "forge" -d
   fi
 }
 
 start() {
   start-tmux-session
-  # logs are $DATA/logs/*.log
-  send-keys "docker run -i -t -v $DATA:/minecraft/data minecraft-$SESS"
-  echo Running in tmux session "$SESS", \`tmux a -s $SESS\` to attach.
+  if [ $(is_running) -eq 0 ];then
+    echo Running in tmux session, \`tmux a -s forge\` to attach.
+    return 0
+  fi
+  port=${1:-25565}
+  mkdir -p "$DATA"/{world,logs}
+  [ ! -L "$WORK_DIR/logs" ] && ln -s "$DATA/logs"  "$WORK_DIR/logs"
+  [ ! -L "$WORK_DIR/world" ] && ln -s "$DATA/world" "$WORK_DIR/world"
+  [ ! -L "$WORK_DIR/mods" ] && ln -s "$ROOT_DIR/mods" "$WORK_DIR/mods"
+  echo eula=true > "$WORK_DIR/eula.txt"
+  send-keys "cd $WORK_DIR"
+  send-keys "java -jar $JVM_OPTIONS $JAR_PATH nogui"
+  echo Running in tmux session, \`tmux a -s forge\` to attach.
 }
 
 stop() {
@@ -87,7 +110,7 @@ stop() {
 }
 
 backup() {
-  TAR="./$SESS-$(date +%Y%m%d-%H%M%S).tar" 
+  TAR="$BACKUP_DIR/forge-$(date +%Y%m%d-%H%M%S).tar" 
   time -p {
     send-keys "save-all"
     send-keys "save-off"
