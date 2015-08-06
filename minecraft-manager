@@ -18,7 +18,7 @@ JAR_PATH="$ROOT_DIR/jar/$JAR"
   -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 \
   -Xloggc:logs/gc.log -XX:-UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=10m \
   -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps \
-  -XX:MaxMetaspaceSize=384M -Xss4M -Xms2G -Xmx2G \
+  -Xss4M -Xms2G -Xmx2G \
   "}
 
 main() {
