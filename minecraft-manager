@@ -118,11 +118,11 @@ backup() {
     send-keys "save-off"
     send-keys "say Start backup.."
     sleep 5
-    tar cvf "$TAR" --dereference -C work ./ --exclude logs --exclude dynmap/web
+    nice -n 1 tar cvf "$TAR" --dereference -C work ./ --exclude logs --exclude dynmap/web
     send-keys "save-on"
     send-keys 'say Finish backup!'
   }
-  xz -1 "$TAR"
+  nice -n 5 xz -1 "$TAR"
 }
 
 main "$@"
