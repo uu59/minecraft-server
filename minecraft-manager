@@ -110,13 +110,17 @@ stop() {
 }
 
 backup() {
-  TAR="$BACKUP_DIR/forge-$(date +%Y%m%d-%H%M%S).tar" 
+  TAR="$BACKUP_DIR/forge-$(date +%Y%m%d)/$(date +%H%M%S).tar"
+  mkdir -p "$(dirname $TAR)"
   time -p {
+    cd $ROOT_DIR
     send-keys "save-all"
     send-keys "save-off"
-    sleep 1
-    tar cf "$TAR" -C "$DATA/.." "./$(basename $DATA)"
+    send-keys "say Start backup.."
+    sleep 5
+    tar cvf "$TAR" --dereference -C work ./ --exclude logs --exclude dynmap/web
     send-keys "save-on"
+    send-keys 'say Finish backup!'
   }
   xz -1 "$TAR"
 }
