@@ -14,11 +14,13 @@ BACKUP_DIR="$ROOT_DIR/backup"
 # JAR="forge-1.7.10-10.13.4.1448-1.7.10-universal.jar"
 : ${JAR:="forge-1.8-11.14.3.1450-universal.jar"}
 JAR_PATH="$ROOT_DIR/jar/$JAR"
-: ${JVM_OPTIONS:="-server -d64 -XX:-UseConcMarkSweepGC \
-  -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 \
+: ${JVM_OPTIONS:="-server -d64 \
+  -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalPacing \
+  -XX:+AggressiveOpts \
+  -XX:MaxGCPauseMillis=30 -XX:ParallelGCThreads=2 \
   -Xloggc:logs/gc.log -XX:-UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=10m \
   -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps \
-  -Xss4M -Xms2G -Xmx2G \
+  -Xms2G -Xmx2G \
   "}
 
 main() {
