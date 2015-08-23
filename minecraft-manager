@@ -127,4 +127,10 @@ backup() {
   nice -n 5 xz -1 "$TAR"
 }
 
+delete_old_backups() {
+  days="${1:-10}"
+  find "$BACKUP_DIR" -mtime +$(expr $days - 1) -type f -delete
+  find "$BACKUP_DIR" -type d -empty -delete
+}
+
 main "$@"
