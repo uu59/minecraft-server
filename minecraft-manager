@@ -15,9 +15,9 @@ BACKUP_DIR="$ROOT_DIR/backup"
 : ${JAR:="forge-1.8-11.14.3.1450-universal.jar"}
 JAR_PATH="$ROOT_DIR/jar/$JAR"
 : ${JVM_OPTIONS:="-server -d64 \
-  -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalPacing \
+  -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalPacing -XX:+UseParNewGC \
   -XX:+AggressiveOpts \
-  -XX:MaxGCPauseMillis=30 -XX:ParallelGCThreads=2 \
+  -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 \
   -Xloggc:logs/gc.log -XX:-UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=10m \
   -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps \
   -Xms2G -Xmx2G \
