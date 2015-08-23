@@ -124,7 +124,7 @@ backup() {
     send-keys "save-on"
     send-keys 'say Finish backup!'
   }
-  nice -n 5 xz -1 "$TAR"
+  nice -n 5 xz -T 0 -1 "$TAR"
   delete_old_backups
 }
 
